@@ -3,19 +3,19 @@
 
 
 int button0Output = 2;
-int button0Input = 2;
+int button0Input = 36;
 int button1Output = 3;
-int button1Input = 3;
+int button1Input = 34;
 int button2Output = 4;
-int button2Input = 4;
+int button2Input = 32;
 int button3Output = 5;
-int button3Input = 5;
+int button3Input = 30;
 int button4Output = 6;
-int button4Input = 6;
+int button4Input = 28;
 int button5Output = 7;
-int button5Input = 7;
+int button5Input = 26;
 int button6Output = 8;
-int button6Input = 8;
+int button6Input = 24;
 int button7Output = 9;
 int button7Input = 22;
 
@@ -111,14 +111,14 @@ class Track {
   public:
   Track()
   {     
-   step0 = new Step(2,2);
-   step1 = new Step(3,3);
-   step2 = new Step(4,4);
-   step3 = new Step(5,5);
-   step4 = new Step(6,6);
-   step5 = new Step(7,7);
-   step6 = new Step(8,8);
-   step7 = new Step(22,9);
+   step0 = new Step(button0Input, button0Output);
+   step1 = new Step(button1Input, button1Output);
+   step2 = new Step(button2Input, button2Output);
+   step3 = new Step(button3Input, button3Output);
+   step4 = new Step(button4Input, button4Output);
+   step5 = new Step(button5Input, button5Output);
+   step6 = new Step(button6Input, button6Output);
+   step7 = new Step(button7Input, button7Output);
 
    currentStep = step0;
   }
@@ -164,6 +164,13 @@ class Track {
 
   void pollInputs()
   {
+    step0->pollInput();
+    step1->pollInput();
+    step2->pollInput();
+    step3->pollInput();
+    step4->pollInput();
+    step5->pollInput();
+    step6->pollInput();
     step7->pollInput();
   }
 
@@ -191,12 +198,19 @@ void setup()
 {
   Serial.begin(9600);
   pinMode(button0Output, OUTPUT);
+  pinMode(button0Input, INPUT);
   pinMode(button1Output, OUTPUT);
+  pinMode(button1Input, INPUT);
   pinMode(button2Output, OUTPUT);
+  pinMode(button2Input, INPUT);
   pinMode(button3Output, OUTPUT);
+  pinMode(button3Input, INPUT);
   pinMode(button4Output, OUTPUT);
+  pinMode(button4Input, INPUT);
   pinMode(button5Output, OUTPUT);
+  pinMode(button5Input, INPUT);
   pinMode(button6Output, OUTPUT);
+  pinMode(button6Input, INPUT);
   pinMode(button7Output, OUTPUT);
   pinMode(button7Input, INPUT);
 }
