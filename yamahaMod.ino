@@ -17,7 +17,7 @@ int button5Input = 7;
 int button6Output = 8;
 int button6Input = 8;
 int button7Output = 9;
-int button7Input = 9;
+int button7Input = 22;
 
 enum StepState {
   CURRENT,
@@ -28,7 +28,7 @@ enum StepState {
 class Step
 {
     private:
-    StepState currentState; 
+    StepState currentLEDState; 
     
     int buttonInPin;
     int buttonLEDPin;
@@ -38,40 +38,53 @@ class Step
     public:
     Step(int _buttonInPin, int _buttonLEDPin)
     {
-        this->currentState = OFF;
+        this->currentLEDState = OFF;
         this->buttonInPin = _buttonInPin;
         this->buttonLEDPin = _buttonLEDPin;
     }
 
-    void poll()
-    {
-      Serial.println("poll");
-       if (this->currentState == CURRENT){
-            analogWrite(buttonLEDPin, 255);
+    void pollInput()
+    {      
+       int val = digitalRead(buttonInPin);
+       if (val == HIGH){
+          if (this->active){
+            this->currentLEDState = OFF;
+            this->active = false;
+            digitalWrite(buttonLEDPin, LOW);             
+          }
+          else {
+            this->currentLEDState = ACTIVE;
+            this->active = true;
+            digitalWrite(buttonLEDPin, HIGH);               
+          }
        }
-       else if (this->currentState == ACTIVE){
+    }
+
+    void setOutputs()
+    {      
+       if (this->currentLEDState == CURRENT){
+          analogWrite(buttonLEDPin, 255);
+       }
+       else if (this->currentLEDState == ACTIVE){
           analogWrite(buttonLEDPin, 70);
        }
        else {
-        Serial.println("off");
           analogWrite(buttonLEDPin, 0);
        }
     }
 
     void enterStep()
     {
-        this->currentState = CURRENT;
+        this->currentLEDState = CURRENT;
     }
 
     void exitStep()
     {
-      Serial.println("exiting state");
-
       if(this->active){
-        this->currentState = ACTIVE;
+        this->currentLEDState = ACTIVE;
       }
       else {
-        this->currentState = OFF; 
+        this->currentLEDState = OFF; 
       }
     }
 
@@ -105,44 +118,35 @@ class Track {
    step4 = new Step(6,6);
    step5 = new Step(7,7);
    step6 = new Step(8,8);
-   step7 = new Step(9,9);
+   step7 = new Step(22,9);
 
    currentStep = step0;
-   currentStep->setActive();
   }
 
   void incrementCurrentStep()
   {
       if (currentStep == step0) {   
-        Serial.println("Setting to step 1");   
           currentStep = step1;
       }
       else if (currentStep == step1){
-        Serial.println("Setting to step 2");
           currentStep = step2;
       }
       else if (currentStep == step2){
-          Serial.println("Setting to step 0");
           currentStep = step3;
       }
       else if (currentStep == step3){
-        Serial.println("Setting to step 0");
           currentStep = step4;
       }
       else if (currentStep == step4){
-        Serial.println("Setting to step 0");
           currentStep = step5;
       }
       else if (currentStep == step5){
-        Serial.println("Setting to step 0");
           currentStep = step6;
       }
       else if (currentStep == step6){
-        Serial.println("Setting to step 0");
           currentStep = step7;
       }
       else if (currentStep == step7){
-        Serial.println("Setting to step 0");
           currentStep = step0;
       }
 
@@ -158,19 +162,23 @@ class Track {
       currentStep->enterStep();
   }
 
-  void poll()
+  void pollInputs()
+  {
+    step7->pollInput();
+  }
+
+  void setOutputs()
   {
       this->incrementCurrentStep();
-      step0->poll();
-      step1->poll();
-      step2->poll();
-      step3->poll();
-      step4->poll();
-      step5->poll();
-      step6->poll();
-      step7->poll();
+      step0->setOutputs();
+      step1->setOutputs();
+      step2->setOutputs();
+      step3->setOutputs();
+      step4->setOutputs();
+      step5->setOutputs();
+      step6->setOutputs();
+      step7->setOutputs();
   }
-  
 };
 
 //main prog
@@ -190,8 +198,7 @@ void setup()
   pinMode(button5Output, OUTPUT);
   pinMode(button6Output, OUTPUT);
   pinMode(button7Output, OUTPUT);
-
-  
+  pinMode(button7Input, INPUT);
 }
 
 void loop() 
@@ -199,10 +206,11 @@ void loop()
 
   float tDelta = millis() - previousTime;
   float tempo = 1000;
-  
+
+  track.pollInputs();
   if (running && tDelta > tempo)
   {
       previousTime = millis();
-      track.poll();
+      track.setOutputs();
   }
 }
